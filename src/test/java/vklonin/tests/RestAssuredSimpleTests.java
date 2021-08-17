@@ -4,16 +4,16 @@ import com.google.gson.Gson;
 import configs.Specs;
 import configs.models.LoginResponse;
 import configs.models.UserCreate;
-import io.restassured.response.ExtractableResponse;
+import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.Test;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static io.restassured.RestAssured.given;
-import static io.restassured.http.ContentType.JSON;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.core.Is.is;
+import static configs.Specs.request;
 
 public class RestAssuredSimpleTests {
     @Test
@@ -79,5 +79,14 @@ public class RestAssuredSimpleTests {
                 .then()
                     .spec(Specs.response400)
                     .assertThat();
+    }
+    @Test
+    void findUserGroovy(){
+        request
+                .when()
+                    .get("users?page=2")
+                .then()
+                    .log().body()
+                    .body("data.findAll{it.id > 0}.first_name",hasItem("Lindsay"));
     }
 }
