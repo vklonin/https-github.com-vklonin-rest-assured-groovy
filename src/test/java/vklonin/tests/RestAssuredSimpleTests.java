@@ -16,26 +16,25 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Is.is;
 
 public class RestAssuredSimpleTests {
-
     @Test
     void getOneUser(){
 
-        Specs.request.when()
+        Specs.request
+                .when()
                     .get("/users/2")
                 .then()
                     .body("data.first_name", is("Janet"));
     }
-
     @Test
     void negativeGetOneUser(){
 
-        Specs.request.when()
+        Specs.request
+                .when()
                     .get("/users/200")
                 .then()
                     .statusCode(404)
                     .assertThat();
     }
-
     @Test
     void postCreateNewUser(){
         String name = "Spartacus";
@@ -45,16 +44,16 @@ public class RestAssuredSimpleTests {
         userCreate.put("job", "rebel leader");
         String userCreateJson = new Gson().toJson(userCreate);
 
-        UserCreate response = Specs.request.when()
-                .body(userCreateJson)
-                .post("users")
+        UserCreate response = Specs.request
+                .when()
+                    .body(userCreateJson)
+                    .post("users")
                 .then()
-                .statusCode(201)
-                .extract().as(UserCreate.class);
+                    .statusCode(201)
+                    .extract().as(UserCreate.class);
 
         assertThat(response.getNameCreate()).isEqualTo(name);
     }
-
     @Test
     void positiveLogin(){
         Map credentials =  new LinkedHashMap();
@@ -62,22 +61,23 @@ public class RestAssuredSimpleTests {
         credentials.put("password", "pistol");
         String credentialsJson = new Gson().toJson(credentials);
 
-        LoginResponse response = Specs.request.when()
-                .body(credentialsJson)
-                .post("login")
+        LoginResponse response = Specs.request
+                .when()
+                    .body(credentialsJson)
+                    .post("login")
                 .then()
-                .statusCode(200)
-                .extract().as(LoginResponse.class);
+                    .spec(Specs.response200)
+                    .extract().as(LoginResponse.class);
         assertThat(response.getTokenToLogin().equals("QpwL5tke4Pnpja7X4"));
     }
     @Test
-
     void negativeLogin(){
-        Specs.request.when()
-                .body("")
-                .post("login")
+        Specs.request
+                .when()
+                    .body("")
+                    .post("login")
                 .then()
-                .statusCode(400)
-                .assertThat();
+                    .spec(Specs.response400)
+                    .assertThat();
     }
 }

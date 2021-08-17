@@ -15,5 +15,11 @@ public class Specs {
             .log().all()
             .contentType(ContentType.JSON);
 
-    public static ResponseSpecification response = new ResponseSpecBuilder().build();
+    public static ResponseSpecification response200 = new ResponseSpecBuilder()
+            .expectStatusCode(200)
+            .build();
+
+    public static ResponseSpecification response400 = new ResponseSpecBuilder()
+            .expectStatusCode(400)
+            .build();
 }
