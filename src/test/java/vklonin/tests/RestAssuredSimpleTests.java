@@ -1,4 +1,9 @@
+package vklonin.tests;
+
 import com.google.gson.Gson;
+import configs.Specs;
+import configs.models.LoginResponse;
+import configs.models.UserCreate;
 import io.restassured.response.ExtractableResponse;
 import org.junit.jupiter.api.Test;
 
@@ -14,34 +19,40 @@ public class RestAssuredSimpleTests {
 
     @Test
     void getOneUser(){
-        given()
-                .get("https://reqres.in/api/users/2")
+
+        Specs.request.when()
+                    .get("/users/2")
                 .then()
-                .body("data.first_name", is("Janet"));
+                    .body("data.first_name", is("Janet"));
     }
 
     @Test
     void negativeGetOneUser(){
 
-        given()
-                .get("https://reqres.in/api/users/200")
+        Specs.request.when()
+                    .get("/users/200")
                 .then()
-                .statusCode(404)
-                .assertThat();
+                    .statusCode(404)
+                    .assertThat();
     }
 
     @Test
     void postCreateNewUser(){
         String name = "Spartacus";
-        ExtractableResponse response =  given()
-                .contentType(JSON)
-                .body("{\"name\": \""+name+"\"," +
-                        "\"job\": \"Warlord\"}")
-                .post("https://reqres.in/api/users")
+
+        Map userCreate =  new LinkedHashMap();
+        userCreate.put("name", name);
+        userCreate.put("job", "rebel leader");
+        String userCreateJson = new Gson().toJson(userCreate);
+
+        UserCreate response = Specs.request.when()
+                .body(userCreateJson)
+                .post("users")
                 .then()
                 .statusCode(201)
-                .extract();
-        assertThat(response.path("name").toString()).isEqualTo(name);
+                .extract().as(UserCreate.class);
+
+        assertThat(response.getNameCreate()).isEqualTo(name);
     }
 
     @Test
@@ -50,21 +61,21 @@ public class RestAssuredSimpleTests {
         credentials.put("email", "eve.holt@reqres.in");
         credentials.put("password", "pistol");
         String credentialsJson = new Gson().toJson(credentials);
-        ExtractableResponse response = given()
-                .contentType(JSON)
+
+        LoginResponse response = Specs.request.when()
                 .body(credentialsJson)
-                .post("https://reqres.in/api/login")
+                .post("login")
                 .then()
                 .statusCode(200)
-                .extract();
-        assertThat(response.path("token").toString()).isEqualTo("QpwL5tke4Pnpja7X4");
+                .extract().as(LoginResponse.class);
+        assertThat(response.getTokenToLogin().equals("QpwL5tke4Pnpja7X4"));
     }
     @Test
+
     void negativeLogin(){
-        given()
-                .contentType(JSON)
+        Specs.request.when()
                 .body("")
-                .post("https://reqres.in/api/login")
+                .post("login")
                 .then()
                 .statusCode(400)
                 .assertThat();
